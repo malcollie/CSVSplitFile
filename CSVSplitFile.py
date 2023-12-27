@@ -8,26 +8,30 @@ def split_csv(input_file, output_prefix, max_entries_per_file=99):
         
         file_number = 1
         current_entries = 0
-        output_file = f"{output_prefix}{file_number}.csv"
-        
-        with open(output_file, 'w', newline='', encoding='utf-8') as output_csv:
-            writer = csv.writer(output_csv)
-            writer.writerow(header)
+
+        while True:
+            output_file = f"{output_prefix}{file_number}.csv"
             
-            for row in reader:
-                writer.writerow(row)
-                current_entries += 1
+            with open(output_file, 'w', newline='', encoding='utf-8') as output_csv:
+                writer = csv.writer(output_csv)
+                writer.writerow(header)
                 
-                if current_entries == max_entries_per_file:
-                    current_entries = 0
-                    file_number += 1
-                    output_file = f"{output_prefix}{file_number}.csv"
-                    
-                    with open(output_file, 'w', newline='', encoding='utf-8') as new_output_csv:
-                        writer = csv.writer(new_output_csv)
-                        writer.writerow(header)
+                for _ in range(max_entries_per_file):
+                    try:
+                        row = next(reader)
+                        writer.writerow(row)
+                        current_entries += 1
+                    except StopIteration:
+                        # End of file reached
+                        break
+
+                if current_entries == 0:
+                    # No more entries, break the loop
+                    break
+
+                file_number += 1
 
 # Example usage
-input_csv_file = 'your_input_file.csv'
+input_csv_file = 'path/to/your/input_file.csv'
 output_file_prefix = 'output'
 split_csv(input_csv_file, output_file_prefix)
